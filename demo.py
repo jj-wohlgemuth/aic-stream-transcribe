@@ -177,8 +177,9 @@ class AudioProcessor:
                 FILE_PATH_ENHANCED,
                 output_html="recordings.html",
             )
-            print(f"\nHTML report created:")
-            print(f"file://{html_path.resolve()}")
+            print("\nHTML report created:")
+            absolute_path = html_path.resolve()
+            print(f"file://{absolute_path}")
         except Exception as e:
             print(f"Error creating HTML report: {e}")
 

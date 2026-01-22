@@ -7,7 +7,7 @@ import soundfile as sf
 from pathlib import Path
 
 
-def audio_with_spectrogram(signal, fs_hz, title, transcript=None, height=380):
+def audio_with_spectrogram(signal, fs_hz, title, transcript=None):
     hv.extension("bokeh", logo=False)
 
     # 1. Generate Waveform
@@ -15,25 +15,27 @@ def audio_with_spectrogram(signal, fs_hz, title, transcript=None, height=380):
     duration = len(audio_data) / fs_hz
     times = np.linspace(0, duration, len(audio_data))
 
+    # Responsive Waveform
+    # FIX: Changed 'aspect_ratio' to 'aspect'
+    # aspect=4 means width is 4x the height
     waveform = hv.Curve((times, audio_data), "Time (s)", "Amplitude").opts(
         title=title,
         responsive=True,
-        height=int(height / 2),
+        aspect=4,
         color="#812481",
-        tools=["hover", "save"],  # Removed 'tap' as we aren't using it
+        tools=["hover", "save"],
+        framewise=True,
     )
 
     # 2. Generate Spectrogram
     f, t, sxx = spectrogram(audio_data, fs_hz, nfft=256)
     log_sxx = np.log10(sxx + 1e-10)
+
+    # Responsive Spectrogram
+    # FIX: Changed 'aspect_ratio' to 'aspect'
     spec_img = rasterize(
         hv.Image((t, f, log_sxx), ["Time (s)", "Frequency (Hz)"]), precompute=True
-    ).opts(
-        responsive=True,
-        height=int(height / 2),
-        cmap="magma",
-        xlabel="",
-    )
+    ).opts(responsive=True, aspect=4, cmap="magma", xlabel="", framewise=True)
 
     # 3. Create Magma-Themed Player
     audio = pn.pane.Audio(
@@ -44,6 +46,7 @@ def audio_with_spectrogram(signal, fs_hz, title, transcript=None, height=380):
         sizing_mode="stretch_width",
         styles={
             "background": "#FFFFFF",
+            "border-radius": "5px",
         },
         stylesheets=[
             """
@@ -58,7 +61,6 @@ def audio_with_spectrogram(signal, fs_hz, title, transcript=None, height=380):
 
     # 4. Format Transcript
     if transcript:
-        # Standardize newlines to HTML breaks
         formatted_transcript = transcript.replace("<end>", "<br>").replace("\n", "<br>")
         markdown_text = f"**Transcript:**\n\n{formatted_transcript}"
     else:
@@ -67,11 +69,16 @@ def audio_with_spectrogram(signal, fs_hz, title, transcript=None, height=380):
     transcript_pane = pn.pane.Markdown(
         markdown_text,
         sizing_mode="stretch_width",
-        height=150,
-        styles={"overflow-y": "auto", "border": "1px solid #eee", "padding": "10px"},
+        max_height=200,
+        styles={
+            "overflow-y": "auto",
+            "border": "1px solid #eee",
+            "padding": "10px",
+            "background": "#fafafa",
+        },
     )
 
-    # 5. Return Full Stack (Waveform + Spectrogram + Audio + Text)
+    # 5. Return Full Stack
     return pn.Column(
         waveform, spec_img, audio, transcript_pane, sizing_mode="stretch_width"
     )
@@ -95,18 +102,17 @@ def create_html_report(
         enh_audio, fs_enh, "Enhanced Audio", enhanced_transcript
     )
 
+    # Main Layout
     layout = pn.Column(
         pn.pane.Markdown("## Audio Comparison"),
         raw_panel,
         pn.layout.Divider(),
         enh_panel,
         sizing_mode="stretch_width",
+        styles={"padding": "20px"},
     )
 
     output_path = Path(output_html)
-
-    # NOTE: embed=True removed to prevent Audio serialization errors.
-    # .save() still produces a standalone HTML file with all data included.
     layout.save(output_path)
 
     return output_path
