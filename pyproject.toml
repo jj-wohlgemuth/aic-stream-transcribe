@@ -1,0 +1,18 @@
+[project]
+name = "aic-stream-transcribe"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "aic-sdk>=2.0.0",
+    "datashader>=0.18.2",
+    "holoviews>=1.22.1",
+    "numpy>=2.3.5",
+    "panel>=1.8.5",
+    "scipy>=1.17.0",
+    "soniox>=1.10.1",
+    "sounddevice>=0.5.4",
+    "soundfile>=0.13.1",
+    "websockets>=16.0",
+]
