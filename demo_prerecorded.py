@@ -82,8 +82,15 @@ def main():
 
         # 6. Generate HTML Report
         print("➤ Generating HTML report...")
+        import os
+
+        input_file_basename = os.path.basename(args.input_file)
         create_html_report(
-            transcript_raw, transcript_enhanced, args.input_file, args.output
+            transcript_raw,
+            transcript_enhanced,
+            args.input_file,
+            args.output,
+            output_html=f"report_{input_file_basename}.html",
         )
 
     except Exception as e:

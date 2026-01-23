@@ -6,47 +6,59 @@ import numpy as np
 import soundfile as sf
 from pathlib import Path
 
+# --- GLOBAL SETTINGS ---
+# Fixed dimensions for 1920x1080 screens
+PLOT_WIDTH = 1100
+WAVEFORM_HEIGHT = 80
+SPECTROGRAM_HEIGHT = 190
+TRANSCRIPT_HEIGHT = 120
+
 
 def audio_with_spectrogram(signal, fs_hz, title, transcript=None):
     hv.extension("bokeh", logo=False)
 
-    # 1. Generate Waveform
+    # 1. Generate Waveform Data
     audio_data = signal.flatten()
     duration = len(audio_data) / fs_hz
-    times = np.linspace(0, duration, len(audio_data))
+    # times = np.linspace(0, duration, len(audio_data))
 
-    # Responsive Waveform
-    # FIX: Changed 'aspect_ratio' to 'aspect'
-    # aspect=4 means width is 4x the height
-    waveform = hv.Curve((times, audio_data), "Time (s)", "Amplitude").opts(
-        title=title,
-        responsive=True,
-        aspect=4,
-        color="#812481",
-        tools=["hover", "save"],
-        framewise=True,
-    )
+    # 2. Fixed Waveform Plot
+    # waveform = hv.Curve((times, audio_data), "Time (s)", "Amplitude").opts(
+    #     title=title,
+    #     width=PLOT_WIDTH,
+    #     height=WAVEFORM_HEIGHT,
+    #     color="#812481",
+    #     tools=["hover", "save"],
+    #     toolbar="above",
+    #     xaxis=None,  # Hide x-axis labels on top plot to reduce clutter
+    # )
 
-    # 2. Generate Spectrogram
+    # 3. Fixed Spectrogram Plot
     f, t, sxx = spectrogram(audio_data, fs_hz, nfft=256)
     log_sxx = np.log10(sxx + 1e-10)
 
-    # Responsive Spectrogram
-    # FIX: Changed 'aspect_ratio' to 'aspect'
     spec_img = rasterize(
-        hv.Image((t, f, log_sxx), ["Time (s)", "Frequency (Hz)"]), precompute=True
-    ).opts(responsive=True, aspect=4, cmap="magma", xlabel="", framewise=True)
+        hv.Image((t, f, log_sxx), ["Time (s)", "Frequency (Hz)"])
+    ).opts(
+        width=PLOT_WIDTH,
+        height=SPECTROGRAM_HEIGHT,
+        cmap="magma",
+        xlabel="Time (s)",
+        toolbar="above",
+    )
 
-    # 3. Create Magma-Themed Player
+    # 4. Fixed Width Audio Player
     audio = pn.pane.Audio(
         audio_data,
         sample_rate=fs_hz,
         name="Audio",
         throttle=50,
-        sizing_mode="stretch_width",
+        width=PLOT_WIDTH,  # FIXED WIDTH
         styles={
             "background": "#FFFFFF",
             "border-radius": "5px",
+            "margin-top": "5px",
+            "margin-bottom": "10px",
         },
         stylesheets=[
             """
@@ -59,7 +71,7 @@ def audio_with_spectrogram(signal, fs_hz, title, transcript=None):
         ],
     )
 
-    # 4. Format Transcript
+    # 5. Fixed Width Transcript
     if transcript:
         formatted_transcript = transcript.replace("<end>", "<br>").replace("\n", "<br>")
         markdown_text = f"**Transcript:**\n\n{formatted_transcript}"
@@ -68,19 +80,25 @@ def audio_with_spectrogram(signal, fs_hz, title, transcript=None):
 
     transcript_pane = pn.pane.Markdown(
         markdown_text,
-        sizing_mode="stretch_width",
-        max_height=200,
+        width=PLOT_WIDTH,  # FIXED WIDTH
+        height=TRANSCRIPT_HEIGHT,  # FIXED HEIGHT
         styles={
             "overflow-y": "auto",
-            "border": "1px solid #eee",
-            "padding": "10px",
+            "border": "1px solid #ddd",
+            "padding": "15px",
             "background": "#fafafa",
+            "border-radius": "4px",
         },
     )
 
-    # 5. Return Full Stack
+    # 6. Return Fixed Column
     return pn.Column(
-        waveform, spec_img, audio, transcript_pane, sizing_mode="stretch_width"
+        # waveform,
+        spec_img,
+        audio,
+        transcript_pane,
+        width=PLOT_WIDTH,  # Lock the container width
+        styles={"margin-bottom": "40px"},  # Spacing between different audio files
     )
 
 
@@ -102,14 +120,13 @@ def create_html_report(
         enh_audio, fs_enh, "Enhanced Audio", enhanced_transcript
     )
 
-    # Main Layout
+    # Main Layout - Centered on screen
     layout = pn.Column(
-        pn.pane.Markdown("## Audio Comparison"),
         raw_panel,
-        pn.layout.Divider(),
+        pn.layout.Divider(width=PLOT_WIDTH),
         enh_panel,
-        sizing_mode="stretch_width",
-        styles={"padding": "20px"},
+        # Center the column on the screen
+        styles={"margin-left": "auto", "margin-right": "auto", "padding-top": "20px"},
     )
 
     output_path = Path(output_html)
