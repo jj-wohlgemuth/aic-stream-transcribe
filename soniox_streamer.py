@@ -15,13 +15,10 @@ class SonioxStreamer:
             raise RuntimeError("Missing SONIOX_API_KEY.")
         self.stream_name = stream_name
         self.on_update = on_update
-
-        # Store final tokens as class attribute to persist them
         self.final_tokens: list[dict] = []
-        self.lock = threading.Lock()  # Thread safety for the list
-
+        self.lock = threading.Lock()
+        self.finished_event = threading.Event()
         config = self.get_config(api_key, fs_hz)
-
         print(f"Connecting {stream_name} to Soniox...")
         self.ws = connect(SONIOX_WEBSOCKET_URL)
         self.ws.send(json.dumps(config))
@@ -29,11 +26,31 @@ class SonioxStreamer:
         self.thread = threading.Thread(target=self._receive_loop, daemon=True)
         self.thread.start()
 
+    def stream_array(self, pcm: np.ndarray, fs_hz: int) -> str:
+        chunk_size = 160
+        num_chunks = int(np.ceil(len(pcm) / chunk_size))
+        print(f"Streaming {self.stream_name} audio to Soniox...")
+        for i in range(num_chunks):
+            start_idx = i * chunk_size
+            end_idx = min((i + 1) * chunk_size, len(pcm))
+            chunk = pcm[start_idx:end_idx]
+            self.process_chunk(chunk)
+        try:
+            self.ws.send("")
+        except Exception:
+            pass
+
+        # 3. Wait for the 'finished' message from the receive loop
+        self.finished_event.wait()
+        self.close()
+        with self.lock:
+            return self.render_tokens(self.final_tokens, [])
+
     def get_config(self, api_key: str, fs_hz: int) -> dict:
         config = {
             "api_key": api_key,
             "model": "stt-rt-v3",
-            "language_hints": ["en"],
+            "language_hints": ["en", "de"],
             "language_hints_strict": True,
             "enable_language_identification": True,
             "enable_speaker_diarization": False,
@@ -52,7 +69,7 @@ class SonioxStreamer:
             try:
                 self.ws.send(chunk_int16.tobytes())
             except Exception:
-                pass  # Connection likely closed
+                pass
 
     def render_tokens(
         self, final_tokens: list[dict], non_final_tokens: list[dict]
@@ -61,7 +78,6 @@ class SonioxStreamer:
         for token in final_tokens + non_final_tokens:
             text = token["text"]
             text_parts.append(text)
-            # Add a newline after sentence terminators
             if text.strip() in [".", "?", "!"]:
                 text_parts.append("\n")
         return "".join(text_parts)
@@ -77,7 +93,6 @@ class SonioxStreamer:
 
                 non_final_tokens: list[dict] = []
 
-                # Protect access to self.final_tokens
                 with self.lock:
                     for token in res.get("tokens", []):
                         if token.get("text"):
@@ -86,7 +101,6 @@ class SonioxStreamer:
                             else:
                                 non_final_tokens.append(token)
 
-                    # Create snapshot for rendering
                     current_finals = list(self.final_tokens)
 
                 text = self.render_tokens(current_finals, non_final_tokens)
@@ -95,24 +109,26 @@ class SonioxStreamer:
                     self.on_update(text)
 
                 if res.get("finished"):
+                    # Signal stream_array to stop waiting
+                    self.finished_event.set()
                     break
 
         except ConnectionClosedOK:
             pass
         except Exception:
             pass
+        finally:
+            self.finished_event.set()
 
     def close(self) -> str:
-        """Closes the connection and returns the full final transcript."""
+        """Closes the connection."""
         if hasattr(self, "ws"):
             try:
-                # Send empty message to signal end of stream if supported
                 self.ws.send("")
             except Exception:
                 pass
             self.ws.close()
 
-        # Join the thread to ensure processing is done (optional, prevents race conditions)
         if (
             hasattr(self, "thread")
             and self.thread.is_alive()

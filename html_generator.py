@@ -115,4 +115,6 @@ def create_html_report(
     output_path = Path(output_html)
     layout.save(output_path)
 
-    return output_path
+    print("\nHTML report created:")
+    absolute_path = output_path.resolve()
+    print(f"file://{absolute_path}")

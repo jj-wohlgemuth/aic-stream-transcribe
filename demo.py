@@ -170,16 +170,13 @@ class AudioProcessor:
             print(f"Error processing files: {e}")
         # ---- Create HTML visualization ----
         try:
-            html_path = create_html_report(
+            create_html_report(
                 raw_transcript,
                 enhanced_transcript,
                 FILE_PATH_RAW,
                 FILE_PATH_ENHANCED,
                 output_html="recordings.html",
             )
-            print("\nHTML report created:")
-            absolute_path = html_path.resolve()
-            print(f"file://{absolute_path}")
         except Exception as e:
             print(f"Error creating HTML report: {e}")
 
@@ -632,6 +629,8 @@ if args.samplerate:
 else:
     # We will determine it inside AudioHandler based on the model
     sample_rate = 0  # Signal to discover optimal
+
+assert license_key is not None, "AIC_SDK_LICENSE environment variable not set."
 
 # Create SDK parameters
 params = SDKParams(

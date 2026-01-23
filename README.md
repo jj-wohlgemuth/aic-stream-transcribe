@@ -4,6 +4,10 @@ A real-time audio enhancement and transcription tool using the **AIC SDK** for s
 
 This tool captures audio from your microphone, processes it using the AIC SDK, and streams both the raw and enhanced audio to Soniox for real-time transcription. At the end of the session, it generates an interactive HTML report comparing the waveforms, spectrograms, and transcripts of the raw vs. enhanced audio.
 
+## Acknowledgments
+
+Special thanks to GitHub users [@user4-33](https://github.com/user4-33) and [@steckes](https://github.com/steckes) for creating the code that made this demo possible.
+
 # Getting started
 
 ## Install UV on macOS
@@ -65,3 +69,20 @@ uv run demo.py -i M2 -o M2 -sr 16000 -m quail-vf-l-16khz
 ```bash
 uv run demo.py -i M2 -o M2 -sr 48000 -m sparrow-l-48khz -t false
 ```
+
+## File Processing (Offline Mode)
+
+In addition to real-time streaming, this project includes a script (`demo_prerecorded.py`) to process existing `.wav` files. This tool enhances a pre-recorded audio file using the AIC SDK, transcribes both the original and enhanced versions using Soniox, and generates a comparative HTML report.
+
+### Usage
+
+```bash
+uv run process.py [INPUT_FILE] [OPTIONS]
+```
+
+| Argument | Description | Default |
+| :--- | :--- | :--- |
+| `input_file` | (Required) Path to the input WAV file. | |
+| `-m`, `--model` | AIC Model name (e.g., `quail-vf-l-16khz`) or path to a `.aicmodel` file. | `quail-vf-l-16khz` |
+| `-o`, `--output` | Path where the enhanced audio WAV will be saved. | `prerecorded_enhanced.wav` |
+| `-h`, `--help` | Show the help message and exit. | |
