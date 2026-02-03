@@ -2,7 +2,7 @@ import argparse
 import sys
 import soundfile as sf
 from pathlib import Path
-from stt_streamers.soniox_streamer import SonioxStreamer, DeepgramStreamer
+from stt_streamers import SonioxStreamer, DeepgramStreamer
 from html_generator import create_html_report
 from aic_sdk_enhancer import process_single_file
 
