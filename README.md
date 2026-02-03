@@ -55,6 +55,7 @@ uv run demo.py -h
 | `-vg`, `--voice-gain` | Gain factor applied to voice signal. | `1.0` |
 | `-t`, `--transcribe` | Enable transcription (`true`/`false`). | `true` |
 | `-s`, `--stt-api` | Specify which STT API to use (`soniox`/`deepgram`). | `soniox` |
+
 Here are a few example parameter sets you can add to the usage section to help users get started quickly with different configurations:
 
 ### Example Scenarios
