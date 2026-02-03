@@ -61,7 +61,17 @@ def process_single_file(
     model_name: str,
 ) -> np.ndarray:
     license_key = get_license_key()
-    model_path = aic.Model.download(model_name, "./models")
+    if os.path.exists(model_name):
+        model_path = model_name
+    else:
+        print(f"Model file '{model_name}' not found locally. Attempting download...")
+        cache_dir = "models"
+        os.makedirs(cache_dir, exist_ok=True)
+        try:
+            model_path = aic.Model.download(model_name, cache_dir)
+            print(f"Downloaded model to: {model_path}")
+        except Exception as e:
+            raise RuntimeError(f"Failed to download model '{model_name}': {e}")
     model = aic.Model.from_file(model_path)
     assert license_key is not None, "AIC_SDK_LICENSE environment variable not set."
     processor = aic.Processor(
