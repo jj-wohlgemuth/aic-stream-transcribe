@@ -2,7 +2,7 @@ import argparse
 import sys
 import soundfile as sf
 from pathlib import Path
-from soniox_streamer import SonioxStreamer
+from stt_streamers.soniox_streamer import SonioxStreamer, DeepgramStreamer
 from html_generator import create_html_report
 from aic_sdk_enhancer import process_single_file
 
@@ -36,6 +36,13 @@ def main():
         default="prerecorded_enhanced.wav",
         help="Path for the enhanced output WAV file (default: prerecorded_enhanced.wav)",
     )
+    parser.add_argument(
+        "-s",
+        "--stt-api",
+        type=str,
+        default="soniox",
+        help="STT API for transcription (soniox or deepgram, default: soniox)",
+    )
 
     args = parser.parse_args()
 
@@ -48,6 +55,7 @@ def main():
     print(f"Processing: {args.input_file}")
     print(f"Model:      {args.model}")
     print(f"Output:     {args.output}")
+    print(f"STT API:    {args.stt_api}")
     print("-" * 40)
 
     try:
@@ -63,18 +71,24 @@ def main():
             enhancement_level=None,  # Use model default
         )
 
-        # 3. Transcribe Raw
-        print("➤ Transcribing RAW audio...")
-        # Note: We pass on_update=None to keep the console clean
-        transcript_raw = SonioxStreamer(fs_hz, "RAW", on_update=None).stream_array(
-            raw_pcm, fs_hz
-        )
+        api_map = {
+            "soniox": SonioxStreamer,
+            "deepgram": DeepgramStreamer,
+        }
 
-        # 4. Transcribe Enhanced
-        print("➤ Transcribing ENHANCED audio...")
-        transcript_enhanced = SonioxStreamer(
-            fs_hz, "ENHANCED", on_update=None
-        ).stream_array(enhanced_pcm, fs_hz)
+        stt_api = args.stt_api.lower()
+        if stt_api not in api_map:
+            raise ValueError(
+                f"Invalid STT API. Choose from: {', '.join(api_map.keys())}"
+            )
+
+        print(f"➤ Transcribing audio with {stt_api.capitalize()}...")
+        Streamer = api_map[stt_api]
+
+        transcript_raw = Streamer(fs_hz, "RAW").stream_array(raw_pcm, fs_hz)
+        transcript_enhanced = Streamer(fs_hz, "ENHANCED").stream_array(
+            enhanced_pcm, fs_hz
+        )
 
         # 5. Save Enhanced Audio
         sf.write(args.output, enhanced_pcm.T, fs_hz)

@@ -19,6 +19,7 @@ brew install uv
 ```bash
 echo 'export AIC_SDK_LICENSE="your_actual_aic_license_key"' >> ~/.zshrc
 echo 'export SONIOX_API_KEY="your_actual_soniox_api_key"' >> ~/.zshrc
+echo 'export DEEPGRAM_API_KEY="your_actual_deepgram_api_key"' >> ~/.zshrc
 ```
 Run this to reload the shell
 ```bash
@@ -53,7 +54,7 @@ uv run demo.py -h
 | `-el`, `--enhancement-level` | Audio enhancement intensity (0.0 to 1.0). | `1.0` |
 | `-vg`, `--voice-gain` | Gain factor applied to voice signal. | `1.0` |
 | `-t`, `--transcribe` | Enable transcription (`true`/`false`). | `true` |
-
+| `-s`, `--stt-api` | Specify which STT API to use (`soniox`/`deepgram`). | `soniox` |
 Here are a few example parameter sets you can add to the usage section to help users get started quickly with different configurations:
 
 ### Example Scenarios

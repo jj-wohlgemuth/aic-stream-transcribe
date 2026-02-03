@@ -14,6 +14,7 @@ class SonioxStreamer:
         if not api_key:
             raise RuntimeError("Missing SONIOX_API_KEY.")
         self.stream_name = stream_name
+        self.api_name = "Soniox RT"
         self.on_update = on_update
         self.final_tokens: list[dict] = []
         self.lock = threading.Lock()

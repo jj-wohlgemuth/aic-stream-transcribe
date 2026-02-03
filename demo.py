@@ -12,7 +12,7 @@ from aic_sdk import (
     ProcessorParameter,
     VadParameter,
 )
-from soniox_streamer import SonioxStreamer
+from stt_streamers import DeepgramStreamer, SonioxStreamer
 import shutil
 import textwrap
 import soundfile as sf
@@ -193,6 +193,7 @@ class AudioHandler:
         num_channels: int,
         dtype: np.dtype,
         transcribe: bool = True,
+        stt_api: str = "soniox",
     ):
         print("Initializing SDK model...")
         self.transcribe = transcribe
@@ -338,8 +339,10 @@ class AudioHandler:
                 )
 
                 # 2. Header
-                header = f"{'RAW':<{self.COL_WIDTH}} | {'ENHANCED':<{self.COL_WIDTH}}"
-                sys.stdout.write(f"\r\033[K{header}\n")
+                if self.transcriber_mix and self.transcriber_pred:
+                    header = f"{'RAW Audio into ' + self.transcriber_mix.api_name:<{self.COL_WIDTH}}\
+                             | {'ENHANCED Audio into ' + self.transcriber_pred.api_name:<{self.COL_WIDTH}}"
+                    sys.stdout.write(f"\r\033[K{header}\n")
 
                 # 3. Data Rows
                 for i in range(self.MAX_ROWS):
@@ -372,12 +375,14 @@ class AudioHandler:
             with self._bypass_lock:
                 return self._bypass_enabled.is_set()
 
-        # Initialize Streamers with Callbacks
         if self.transcribe:
-            self.transcriber_mix = SonioxStreamer(
+            Streamer = (
+                DeepgramStreamer if stt_api.lower() == "deepgram" else SonioxStreamer
+            )
+            self.transcriber_mix = Streamer(
                 fs_hz, "RAW", on_update=update_raw_transcript
             )
-            self.transcriber_pred = SonioxStreamer(
+            self.transcriber_pred = Streamer(
                 fs_hz, "ENHANCED", on_update=update_enhanced_transcript
             )
         else:
@@ -619,6 +624,13 @@ parser.add_argument(
     default=True,
     help="enable transcription (true/false, default: true)",
 )
+parser.add_argument(
+    "-s",
+    "--stt-api",
+    type=str,
+    default="soniox",
+    help="STT API for transcription (soniox or deepgram, default: soniox)",
+)
 args = parser.parse_args(remaining)
 
 license_key = get_license_key()
@@ -653,6 +665,7 @@ audio_handler = AudioHandler(
     num_channels=args.channels,
     dtype=np.dtype("float32"),
     transcribe=args.transcribe,
+    stt_api=args.stt_api if hasattr(args, "stt_api") else "soniox",
 )
 
 # If we auto-detected the rate, update our local variable for the Stream

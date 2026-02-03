@@ -4,7 +4,7 @@ import soundfile as sf
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
-from soniox_streamer import SonioxStreamer
+from stt_streamers import SonioxStreamer, DeepgramStreamer
 from html_generator import create_html_report
 from aic_sdk_enhancer import process_single_file
 
@@ -12,7 +12,9 @@ from aic_sdk_enhancer import process_single_file
 COLORS = ["green", "yellow", "blue", "magenta", "cyan", "red"]
 
 
-def process_file(file_path: Path, output_dir: Path, model_name: str, position: int):
+def process_file(
+    file_path: Path, output_dir: Path, model_name: str, stt_api: str, position: int
+):
     """
     Process a single WAV file with a dedicated progress bar.
     """
@@ -47,21 +49,19 @@ def process_file(file_path: Path, output_dir: Path, model_name: str, position: i
             )
             pbar.update(1)
 
-            # 2. Transcribe Raw
+            Streamer = (
+                DeepgramStreamer if stt_api.lower() == "deepgram" else SonioxStreamer
+            )
             pbar.set_postfix_str("Transcribing Raw...")
-            transcript_raw = SonioxStreamer(fs_hz, "RAW", on_update=None).stream_array(
-                raw_pcm, fs_hz
+            transcript_raw = Streamer(fs_hz, "RAW").stream_array(raw_pcm, fs_hz)
+            pbar.update(1)
+
+            pbar.set_postfix_str("Transcribing Enh...")
+            transcript_enhanced = Streamer(fs_hz, "ENHANCED").stream_array(
+                enhanced_pcm, fs_hz
             )
             pbar.update(1)
 
-            # 3. Transcribe Enhanced
-            pbar.set_postfix_str("Transcribing Enh...")
-            transcript_enhanced = SonioxStreamer(
-                fs_hz, "ENHANCED", on_update=None
-            ).stream_array(enhanced_pcm, fs_hz)
-            pbar.update(1)
-
-            # 4. Save & Generate Report
             pbar.set_postfix_str("Saving...")
             if enhanced_pcm.ndim > 1 and enhanced_pcm.shape[0] < enhanced_pcm.shape[1]:
                 enhanced_pcm = enhanced_pcm.T
@@ -90,6 +90,13 @@ def main():
     parser.add_argument("input_folder", type=str, help="Path to input folder")
     parser.add_argument("-m", "--model", type=str, default="quail-vf-l-16khz")
     parser.add_argument("-w", "--workers", type=int, default=2, help="Parallel threads")
+    parser.add_argument(
+        "-s",
+        "--stt-api",
+        type=str,
+        default="soniox",
+        help="STT API for transcription (soniox or deepgram, default: soniox)",
+    )
 
     args = parser.parse_args()
 
@@ -126,7 +133,9 @@ def main():
             # Here we just stack them.
             pos = i % args.workers
             futures.append(
-                executor.submit(process_file, wav_file, input_dir, args.model, pos)
+                executor.submit(
+                    process_file, wav_file, input_dir, args.model, args.stt_api, pos
+                )
             )
 
         for future in as_completed(futures):
