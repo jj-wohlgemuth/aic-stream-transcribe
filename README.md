@@ -51,19 +51,37 @@ uv run demo.py -h
 | `-m`, `--model` | Model name (e.g. `quail-vf-l-16khz`) or path to `.aicmodel`. | `quail-vf-l-16khz` |
 | `-sr`, `--samplerate` | Sampling rate (overrides model optimal rate). | Model Optimal |
 | `-c`, `--channels` | Number of channels. | `1` |
-| `-el`, `--enhancement-level` | Audio enhancement intensity (0.0 to 1.0). | `1.0` |
-| `-vg`, `--voice-gain` | Gain factor applied to voice signal. | `1.0` |
+| `-el`, `--enhancement-level` | Audio enhancement intensity (0.0 to 1.0). | `0.8` |
+| `-a`, `--amplify` | Pre-enhancement input amplification in dB. Clips signal to [-1, 1] before processing. A clipping warning is printed if the amplified signal exceeds the range. | `0.0` |
 | `-t`, `--transcribe` | Enable transcription (`true`/`false`). | `true` |
 | `-s`, `--stt-api` | Specify which STT API to use (`soniox`/`deepgram`). | `soniox` |
+
+### Enhancement Level
+
+`--enhancement-level` (0.0–1.0) controls how aggressively the model suppresses noise and enhances speech. A value of `1.0` applies the full enhancement; `0.0` passes audio through with minimal processing. Some models have a fixed enhancement level and will ignore this parameter with a warning.
+
+### Amplification and Clipping
+
+`--amplify` applies a gain (in dB) to the input signal **before** it is passed to the enhancement model. This is useful when the microphone input is too quiet for the model to process effectively.
+
+- Positive values (e.g. `6.0`) boost the signal; negative values attenuate it.
+- After amplification the signal is **hard-clipped** to the range `[-1.0, 1.0]` to prevent overflow. If clipping occurs, a yellow warning is printed to the terminal (throttled to once per second).
+- Use the minimum amplification needed — excessive gain will introduce clipping distortion before enhancement.
 
 Here are a few example parameter sets you can add to the usage section to help users get started quickly with different configurations:
 
 ### Example Scenarios
 
-16 kHz Voice Focus
+16 kHz Voice Focus on Motu M2 Audio Interface
 
 ```bash
-uv run demo.py -i M2 -o M2 -sr 16000 -m quail-vf-l-16khz
+uv run demo.py -i M2 -o M2 -sr 16000 -m quail-vf-2.0-l-16khz
+```
+
+16 kHz Voice Focus on Mac Book
+
+```bash
+uv run demo.py -i "MacBook Pro Microphone" -o "MacBook Pro Speakers" -sr 16000 -m quail-vf-2.0-l-16khz -el 0.8 -a 9.0
 ```
 
 48kHz perceptual speech enhancement Processing without transcription

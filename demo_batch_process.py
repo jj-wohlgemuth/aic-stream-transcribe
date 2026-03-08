@@ -1,5 +1,7 @@
 import argparse
 import sys
+import tempfile
+import numpy as np
 import soundfile as sf
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -13,7 +15,7 @@ COLORS = ["green", "yellow", "blue", "magenta", "cyan", "red"]
 
 
 def process_file(
-    file_path: Path, output_dir: Path, model_name: str, stt_api: str, position: int
+    file_path: Path, output_dir: Path, model_name: str, stt_api: str, position: int, enhancement_level: float = 0.8, amplify_db: float = 0.0
 ):
     """
     Process a single WAV file with a dedicated progress bar.
@@ -40,12 +42,28 @@ def process_file(
             raw_pcm, fs_hz = sf.read(str(file_path), dtype="float32")
             pbar.update(1)
 
+            # Apply amplification and clipping before enhancement
+            enhance_input = str(file_path)
+            if amplify_db != 0.0:
+                gain = 10 ** (amplify_db / 20.0)
+                amplified = raw_pcm * gain
+                if np.any(np.abs(amplified) > 1.0):
+                    clipped_pct = np.mean(np.abs(amplified) > 1.0) * 100
+                    tqdm.write(
+                        f"Warning: clipping in {file_path.name} ({clipped_pct:.1f}% of samples). "
+                        f"Consider reducing --amplify."
+                    )
+                raw_pcm = np.clip(amplified, -1.0, 1.0)
+                with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
+                    enhance_input = tmp.name
+                sf.write(enhance_input, raw_pcm, fs_hz)
+
             # 1. Process Audio
             pbar.set_postfix_str("Enhancing...")
             enhanced_pcm = process_single_file(
-                str(file_path),
+                enhance_input,
                 model_name=model_name,
-                enhancement_level=None,
+                enhancement_level=enhancement_level,
             )
             pbar.update(1)
 
@@ -97,6 +115,20 @@ def main():
         default="soniox",
         help="STT API for transcription (soniox or deepgram, default: soniox)",
     )
+    parser.add_argument(
+        "-el",
+        "--enhancement-level",
+        type=float,
+        default=0.8,
+        help="audio enhancement intensity (0.0 to 1.0, default: 0.8)",
+    )
+    parser.add_argument(
+        "-a",
+        "--amplify",
+        type=float,
+        default=0.0,
+        help="amplification in dB applied to input before enhancement (default: 0.0 dB). Clips to [-1, 1].",
+    )
 
     args = parser.parse_args()
 
@@ -134,7 +166,7 @@ def main():
             pos = i % args.workers
             futures.append(
                 executor.submit(
-                    process_file, wav_file, input_dir, args.model, args.stt_api, pos
+                    process_file, wav_file, input_dir, args.model, args.stt_api, pos, args.enhancement_level, args.amplify
                 )
             )
 

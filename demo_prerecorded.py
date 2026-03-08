@@ -1,5 +1,7 @@
 import argparse
 import sys
+import tempfile
+import numpy as np
 import soundfile as sf
 from pathlib import Path
 from stt_streamers import SonioxStreamer, DeepgramStreamer
@@ -43,6 +45,20 @@ def main():
         default="soniox",
         help="STT API for transcription (soniox or deepgram, default: soniox)",
     )
+    parser.add_argument(
+        "-el",
+        "--enhancement-level",
+        type=float,
+        default=0.8,
+        help="audio enhancement intensity (0.0 to 1.0, default: 0.8)",
+    )
+    parser.add_argument(
+        "-a",
+        "--amplify",
+        type=float,
+        default=0.0,
+        help="Amplification in decibels applied to the input before enhancement (default: 0.0 dB). Clips to [-1, 1].",
+    )
 
     args = parser.parse_args()
 
@@ -56,6 +72,7 @@ def main():
     print(f"Model:      {args.model}")
     print(f"Output:     {args.output}")
     print(f"STT API:    {args.stt_api}")
+    print(f"Amplify:    {args.amplify:+.1f} dB")
     print("-" * 40)
 
     try:
@@ -63,12 +80,29 @@ def main():
         print("➤ Loading audio...")
         raw_pcm, fs_hz = sf.read(args.input_file, dtype="float32")
 
-        # 2. Process Audio (AIC SDK)
+        # 2. Apply amplification and clip before enhancement
+        enhance_input = args.input_file
+        if args.amplify != 0.0:
+            gain = 10 ** (args.amplify / 20.0)
+            amplified = raw_pcm * gain
+            if np.any(np.abs(amplified) > 1.0):
+                clipped_pct = np.mean(np.abs(amplified) > 1.0) * 100
+                print(
+                    f"Warning: clipping detected in {clipped_pct:.1f}% of samples. "
+                    f"Consider reducing --amplify."
+                )
+            raw_pcm = np.clip(amplified, -1.0, 1.0)
+            print(f"➤ Applied {args.amplify:+.1f} dB amplification with clipping")
+            with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
+                enhance_input = tmp.name
+            sf.write(enhance_input, raw_pcm, fs_hz)
+
+        # 3. Process Audio (AIC SDK)
         print("➤ Enhancing audio with AIC SDK...")
         enhanced_pcm = process_single_file(
-            args.input_file,
+            enhance_input,
             model_name=args.model,
-            enhancement_level=None,  # Use model default
+            enhancement_level=args.enhancement_level,
         )
 
         api_map = {

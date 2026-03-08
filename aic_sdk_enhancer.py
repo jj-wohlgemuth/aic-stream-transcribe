@@ -107,17 +107,19 @@ def process_single_file(
             proc_ctx.set_parameter(
                 aic.ProcessorParameter.EnhancementLevel, enhancement_level
             )
+
         except aic.ParameterFixedError:
             warnings.warn(
                 "Enhancement level cannot be adjusted for this model. "
                 "This model has a fixed enhancement level. Please run without specifying --enhancement-level.",
                 UserWarning,
             )
-    else:
-        # Use model's default enhancement level
-        enhancement_level = proc_ctx.get_parameter(
-            aic.ProcessorParameter.EnhancementLevel
-        )
+
+    # Use model's default enhancement level
+    enhancement_level = processor.get_processor_context().get_parameter(
+        aic.ProcessorParameter.EnhancementLevel
+    )
+    print(f"Using enhancement level: {enhancement_level:.2f}")
 
     # Initialize output array
     output = np.zeros_like(audio_input)

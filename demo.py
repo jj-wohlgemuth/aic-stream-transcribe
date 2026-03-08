@@ -5,6 +5,7 @@ import os
 import sys
 import threading
 import select
+import time as _time
 from aic_sdk import (
     Model,
     Processor,
@@ -52,12 +53,12 @@ class SDKParams:
         enhancement_level: float,
         license_key: str,
         model_name: str,
-        voice_gain_factor: float = 1,
+        amplify_db: float = 0.0,
     ):
         self.enhancement_level: float = enhancement_level
         self.license_key: str = license_key
         self.model_name: str = model_name
-        self.voice_gain_factor: float = voice_gain_factor
+        self.amplify_db: float = amplify_db
 
 
 class AudioProcessor:
@@ -78,6 +79,7 @@ class AudioProcessor:
         bypass_callback=None,
         transcriber_mix=None,
         transcriber_pred=None,
+        amplify_db: float = 0.0,
     ):
         self.processor = processor
         self.vad_context = vad_context
@@ -94,6 +96,8 @@ class AudioProcessor:
         self.last_bypass_state = False
         self.input_frames = []
         self.output_frames = []
+        self.amplify_gain = 10 ** (amplify_db / 20.0) if amplify_db != 0.0 else 1.0
+        self._last_clip_warning = 0.0
 
     def process_frame(self, indata: np.ndarray) -> np.ndarray:
         """
@@ -119,6 +123,19 @@ class AudioProcessor:
             indata_copy = indata_copy.reshape(1, -1)
         else:
             indata_copy = indata.T
+
+        # Apply pre-enhancement amplification
+        if self.amplify_gain != 1.0:
+            amplified = indata_copy * self.amplify_gain
+            if np.any(np.abs(amplified) > 1.0):
+                now = _time.monotonic()
+                if now - self._last_clip_warning >= 1.0:
+                    self._last_clip_warning = now
+                    sys.stdout.write(
+                        "\r\033[K\033[33mWarning: clipping detected! Reduce --amplify.\033[0m\n"
+                    )
+                    sys.stdout.flush()
+            indata_copy = np.clip(amplified, -1.0, 1.0)
 
         # Process the chunk (modifies chunk in-place)
         outdata = self.processor.process(indata_copy)
@@ -253,14 +270,6 @@ class AudioHandler:
             print(
                 f"Warning: Failed to set Enhancement Level to {params.enhancement_level}: {e}"
             )
-        try:
-            self.proc_ctx.set_parameter(
-                ProcessorParameter.VoiceGain, params.voice_gain_factor
-            )
-        except Exception as e:
-            print(
-                f"Warning: Failed to set Voice Gain to {params.voice_gain_factor}: {e}"
-            )
         self.vad_ctx.set_parameter(VadParameter.Sensitivity, 15.0)
 
         processing_latency_samples = self.proc_ctx.get_output_delay()
@@ -340,8 +349,14 @@ class AudioHandler:
 
                 # 2. Header
                 if self.transcriber_mix and self.transcriber_pred:
-                    header = f"{'RAW Audio into ' + self.transcriber_mix.api_name:<{self.COL_WIDTH}}\
-                             | {'ENHANCED Audio into ' + self.transcriber_pred.api_name:<{self.COL_WIDTH}}"
+                    header = (
+                        f"{'RAW Audio into ' + self.transcriber_mix.api_name:<{self.COL_WIDTH}}"
+                        f" | "
+                        f"{'ENHANCED Audio into ' + self.transcriber_pred.api_name:<{self.COL_WIDTH}}"
+                    )
+                    max_w = (self.COL_WIDTH * 2) + 3
+                    if len(header) > max_w:
+                        header = header[:max_w]
                     sys.stdout.write(f"\r\033[K{header}\n")
 
                 # 3. Data Rows
@@ -401,6 +416,7 @@ class AudioHandler:
             bypass_callback=get_bypass_state,
             transcriber_mix=self.transcriber_mix,
             transcriber_pred=self.transcriber_pred,
+            amplify_db=params.amplify_db,
         )
 
     def toggle_bypass(self):
@@ -423,7 +439,7 @@ class AudioHandler:
         print()
         print("➤ Current Sampling Rate:", f"{self.fs_hz} Hz")
         print("➤ Enhancement Level:", self.params.enhancement_level)
-        print("➤ Voice Gain:", self.params.voice_gain_factor)
+        print("➤ Amplification:", f"{self.params.amplify_db:+.1f} dB")
 
         bypass_state = "ON" if self.is_bypass_enabled() else "OFF"
         print("➤ Bypass Mode:", bypass_state)
@@ -607,15 +623,15 @@ parser.add_argument(
     "-el",
     "--enhancement-level",
     type=float,
-    default=1.0,
-    help="audio enhancement intensity (0.0 to 1.0, default: 1.0)",
+    default=0.8,
+    help="audio enhancement intensity (0.0 to 1.0, default: 0.8)",
 )
 parser.add_argument(
-    "-vg",
-    "--voice-gain",
+    "-a",
+    "--amplify",
     type=float,
-    default=1.0,
-    help="gain factor applied to voice signal (default: 1.0)",
+    default=0.0,
+    help="amplification in dB applied to input before enhancement (default: 0.0 dB). Clips to [-1, 1].",
 )
 parser.add_argument(
     "-t",
@@ -649,7 +665,7 @@ params = SDKParams(
     enhancement_level=args.enhancement_level,
     license_key=license_key,
     model_name=args.model,
-    voice_gain_factor=args.voice_gain,
+    amplify_db=args.amplify,
 )
 
 

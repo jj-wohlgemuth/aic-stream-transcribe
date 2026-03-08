@@ -12,30 +12,31 @@ resolution-markers = [
 
 [[package]]
 name = "aic-sdk"
-version = "2.0.0"
+version = "2.1.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "numpy" },
 ]
+sdist = { url = "https://files.pythonhosted.org/packages/ea/d1/faca6596c0d598063b4b9e879f4110fde9dee1496273d6410505bc81fdcc/aic_sdk-2.1.0.tar.gz", hash = "sha256:b661743dce36413ddd264b909d818dfc997c3a189e4c52fed263f2177ee3bb17", size = 5315216 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c6/8c/c4fad798b6a3a88742530e52f7ee7fd247fbf17d594d59fa7b165c472632/aic_sdk-2.0.0-cp312-cp312-macosx_10_12_x86_64.whl", hash = "sha256:6fe6da6051e7c562ad11fbc274cb373fbeabf174f5164507ef01ebe022b4fb44", size = 4908843 },
-    { url = "https://files.pythonhosted.org/packages/ad/90/f449c6122995c00ba7d52aa25a2c68e23cc113911cdcb2e70af978aaabcf/aic_sdk-2.0.0-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:2ce32708f421c01d1a459ef2e9af9832abd646f016db245d783661a44ae8c1dc", size = 4462931 },
-    { url = "https://files.pythonhosted.org/packages/a3/5b/c28528465b1b75cc8901bd3e7890da7aa10c8b7ad2c38452af5192cff925/aic_sdk-2.0.0-cp312-cp312-manylinux_2_34_aarch64.whl", hash = "sha256:b7f060411b8d9c75aa44d80a516c6ebec613a6cbff66eae5f0910f829f0e1aca", size = 3981673 },
-    { url = "https://files.pythonhosted.org/packages/d3/66/2cbc41626fca4220656227536f471bddcf66448956d0f671221b20965958/aic_sdk-2.0.0-cp312-cp312-manylinux_2_34_x86_64.whl", hash = "sha256:cc938fb94c6a0a7ab114bfcd2541cfe1e3c9cf49582fb57b85c349b2aa2a39be", size = 4428223 },
-    { url = "https://files.pythonhosted.org/packages/06/af/de49e07faabd6f6f1460f3aefa2f5cec45a6ff02dcee43122daaefc39841/aic_sdk-2.0.0-cp312-cp312-win_amd64.whl", hash = "sha256:3bdb29ed4534c1cbd4c236852c71375e13fd7d07b45a879ea887ae697b7d1693", size = 3675153 },
-    { url = "https://files.pythonhosted.org/packages/2f/7d/2b48ef018a10294a6057024178c66a119bc9c862977787cc331a98035cbb/aic_sdk-2.0.0-cp312-cp312-win_arm64.whl", hash = "sha256:c5b63a6702f847605c87e1ce65e55bcbb8cd247aea294c09f73cd331ec4ea182", size = 3286786 },
-    { url = "https://files.pythonhosted.org/packages/80/4f/13880aff53c5d9e5b504a2735bcd2bad51a0ecd176c1bd4c94d2cb7c2b9e/aic_sdk-2.0.0-cp313-cp313-macosx_10_12_x86_64.whl", hash = "sha256:665f43f0cb05d23da7849fd6a39a525c5cc2c4e6eed82184342d03f0c7cee741", size = 4908415 },
-    { url = "https://files.pythonhosted.org/packages/bd/72/9af3d5653f490d4fa33d9bb578b0b0854146c4baafbc05cebd876ddb1637/aic_sdk-2.0.0-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:1fefc4d853471187e237a8694edeeb1f6d3714dedd3b5afbdb7a024c89e904c7", size = 4462480 },
-    { url = "https://files.pythonhosted.org/packages/a8/fe/9fc79aa6a6045b9e7cdf1d1c960751ae94c070a1d5016bb2689e74ded07b/aic_sdk-2.0.0-cp313-cp313-manylinux_2_34_aarch64.whl", hash = "sha256:61d4fbc5c413734b1f0241a7dcc388290d344680eaa436136777e07684ebe151", size = 3981530 },
-    { url = "https://files.pythonhosted.org/packages/10/1f/507cb088be6c67c06603c794a3fe29ff143fd1e0e6a650b59c869f651dfa/aic_sdk-2.0.0-cp313-cp313-manylinux_2_34_x86_64.whl", hash = "sha256:6f2dac51a889cf6b422c2fbcc63a8ba6f5f14efb8025aa5e8354eaaf5ded7c63", size = 4428108 },
-    { url = "https://files.pythonhosted.org/packages/76/f0/a66c59c6e7b65a3d4dba6a01b2fd9abd50b2361c60810d6cdeeebfa23131/aic_sdk-2.0.0-cp313-cp313-win_amd64.whl", hash = "sha256:a0933c939f592cfa36330392a3df61b371d31378826c020703043430ad9e33fb", size = 3674951 },
-    { url = "https://files.pythonhosted.org/packages/ca/32/1483c3cff46d09f1805834ea60da14c1888c6c8c47718a96693c92599ffd/aic_sdk-2.0.0-cp313-cp313-win_arm64.whl", hash = "sha256:b277e9036a16c42ea73fd4f8c0c8648821b50a650fdc60d888bca7506afddb7a", size = 3286808 },
-    { url = "https://files.pythonhosted.org/packages/a0/b7/e79cdf23a530ac74c113df5ae2b4dca0211c03aaa1b44e653bba161bf246/aic_sdk-2.0.0-cp314-cp314-macosx_10_12_x86_64.whl", hash = "sha256:0a1e52a3421ccc8c64af278a65cc21ed3705232e5007a9cf55a5284e18519a12", size = 4909738 },
-    { url = "https://files.pythonhosted.org/packages/88/68/0a92a4b81ebc0a5bad3b8bdffbcb023915c5f07a1ada6e13d1b878f3ae1d/aic_sdk-2.0.0-cp314-cp314-macosx_11_0_arm64.whl", hash = "sha256:1fdff1589bb2266ef77801da657266475a2d73504a6c1f2ad869f4ef63d8ecd2", size = 4463322 },
-    { url = "https://files.pythonhosted.org/packages/5c/1c/ef9bbe2453b5f3bdd40a557a939050525dc4648a53c8ab007e195a7dbdfa/aic_sdk-2.0.0-cp314-cp314-manylinux_2_34_aarch64.whl", hash = "sha256:7277050705a35944ecc891dbc1cafedc3af53af872f59941c84235b5d6d90da4", size = 3982041 },
-    { url = "https://files.pythonhosted.org/packages/b8/12/53116287f29aa2c82f0ef7275784101d6edaecc4772451151fa2e3ebcc79/aic_sdk-2.0.0-cp314-cp314-manylinux_2_34_x86_64.whl", hash = "sha256:41642b2d8bbab08387b70ca7bc390f32b53a314e9032ff19f6f8b39fcf975f06", size = 4428681 },
-    { url = "https://files.pythonhosted.org/packages/a1/c8/53311e29a38ef407da6aa2d124175397b58adef61c060cc5cef6f7d00341/aic_sdk-2.0.0-cp314-cp314-win_amd64.whl", hash = "sha256:4342a227994b90fbd24803a9db053a0a49f6c6d65cb9726cede071d25de75442", size = 3677186 },
-    { url = "https://files.pythonhosted.org/packages/0e/cb/ca391511c08171e7045546637f0839d126765ae508bab30d9e895b2d51ff/aic_sdk-2.0.0-cp314-cp314-win_arm64.whl", hash = "sha256:d2473bb4312ec8136f9c1519bde5051673061fb2678ff191ec3bbfbeb963ad40", size = 3288946 },
+    { url = "https://files.pythonhosted.org/packages/7f/57/6628d40bee36683fc0326cb04cda86110117cac1d8f0be01853fe5947901/aic_sdk-2.1.0-cp312-cp312-macosx_10_12_x86_64.whl", hash = "sha256:aa48d55ae3fa8768616f79e1d6794558edb35aa622b3741380b266ff62d7e109", size = 3592839 },
+    { url = "https://files.pythonhosted.org/packages/6f/1c/b4dd728d224159b282c23a1da2f3469b4c73c786067214e11e4612948e99/aic_sdk-2.1.0-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:7d67c00d462342381f44de49340482e1f29625af71f5266bd2a96bbfe5beb684", size = 3204605 },
+    { url = "https://files.pythonhosted.org/packages/6e/1b/0826e0fe91efd84899afe645ac184514a1f326beccc741c7a2dda65a44a5/aic_sdk-2.1.0-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:6e36280c0d6adfff644c8c29c6274e12fb0d805b7c97cf6395f35c10f45e1150", size = 3119984 },
+    { url = "https://files.pythonhosted.org/packages/6b/34/aa722c8fb6770713caf85c3ead104ddbe64d099f0627da67acc95f9dad40/aic_sdk-2.1.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:b110813c3784ba37c4df992a157ac53f4a65fd17aec604f233eda031857607d2", size = 3477716 },
+    { url = "https://files.pythonhosted.org/packages/ce/a7/e2173e19153e91520b0926f53649fdda37bda40082b66e42039bfacfbb27/aic_sdk-2.1.0-cp312-cp312-win_amd64.whl", hash = "sha256:98ce4ba6d3afe8c04425a0b3fd630369f1300ed1bfee82d9f197d521827aa257", size = 2958707 },
+    { url = "https://files.pythonhosted.org/packages/61/83/4bb29c673e739453309c6e5acac1fd451bf9ecc12ba8f0bfeb6497e9658a/aic_sdk-2.1.0-cp312-cp312-win_arm64.whl", hash = "sha256:aedeedc12009ca0e0dd662aa5df55fd3cfcbe4d67eb84e08b7df92288c6f2908", size = 2644622 },
+    { url = "https://files.pythonhosted.org/packages/1f/07/84856156fb2fbe17f502b6e37468010eeb5d699ab818047524e1ea98fe28/aic_sdk-2.1.0-cp313-cp313-macosx_10_12_x86_64.whl", hash = "sha256:7b837806b43959ee7405ffd5a129bd5414651664ae503b6cee742331fbb86c72", size = 3592075 },
+    { url = "https://files.pythonhosted.org/packages/44/8d/29beab45bd22f95adf5f1db51d6c56386b9e83b4518c1db37f867523b419/aic_sdk-2.1.0-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:6e0b5d2117f203de43e1e4edb85ca751cb62ccc74a1a216a9f76f0f171c36c25", size = 3204125 },
+    { url = "https://files.pythonhosted.org/packages/7b/d1/cc87240ad4907d23c96cc9b4645e6fd9b73f48e3a2e337dd2c7bf7f72d6e/aic_sdk-2.1.0-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:322b56a6c636acd5b869c09a55deb280f8eb56e7b9d13cb9ac833616491b0c46", size = 3119501 },
+    { url = "https://files.pythonhosted.org/packages/87/b3/a15bb0721c54b440291c4f0f58cacb3f8f7a6848394956aca7e5dcad59a4/aic_sdk-2.1.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:f6ce9b1f54150644825e2ffda7f2a8eb6a60d207c4e2265124afb90277351065", size = 3476855 },
+    { url = "https://files.pythonhosted.org/packages/26/f9/76ac25c997569248d3bfa0c812468f3917a15bcd957c3ed7e066ab928d56/aic_sdk-2.1.0-cp313-cp313-win_amd64.whl", hash = "sha256:4290a6d0220fe8e9edd1c328d5c2b6bc8c4f4c36b50c24ab0eb073a71d8c58be", size = 2958258 },
+    { url = "https://files.pythonhosted.org/packages/ee/12/c463bbbc71c19fb1b74015f72301c3d762acc83a8311c1f2f9d9150c9926/aic_sdk-2.1.0-cp313-cp313-win_arm64.whl", hash = "sha256:bee85004a44bcc50146c07796d3f71ab58df465a1110a98a04d715c54748910e", size = 2644105 },
+    { url = "https://files.pythonhosted.org/packages/f5/05/f78557c1c8636d3f2a25a74b38fb805ef98ca90aaaa772f83b77f2123072/aic_sdk-2.1.0-cp314-cp314-macosx_10_12_x86_64.whl", hash = "sha256:4c1f4cf18e7f44bc554dc90d94d6ff5250f9ffcc0edf91fab0e95f11ae859ac9", size = 3593602 },
+    { url = "https://files.pythonhosted.org/packages/17/87/67c333feb57df6a288f8b7c5245feab5b2248870499a958121f103f60b1c/aic_sdk-2.1.0-cp314-cp314-macosx_11_0_arm64.whl", hash = "sha256:679260aaa6ecb8ebf531c10d2eaa148edfc91c1c31a84bf63d8c3aa691d09afc", size = 3204838 },
+    { url = "https://files.pythonhosted.org/packages/4e/a6/9964ab0e93139f214a23717101b6834ca3422f5a6787ca61ea852f6772ec/aic_sdk-2.1.0-cp314-cp314-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:bcf8e9d84a3cefff9aca3a84224c210439e9590d8461d8c718e0cee5a7054744", size = 3120147 },
+    { url = "https://files.pythonhosted.org/packages/a7/f2/c6823e1f02559884eed7aeb4b580d5155568628748af844952fdf833858e/aic_sdk-2.1.0-cp314-cp314-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:3e845faeaab18ce76d8ad81d9dbbeab8bca12c7f8503a1e5a6a638e2fac5ee8d", size = 3478437 },
+    { url = "https://files.pythonhosted.org/packages/96/9c/21e7a85d4ad27cce9e8e385f5ab2f1b25b547cc74597a806945025d75efc/aic_sdk-2.1.0-cp314-cp314-win_amd64.whl", hash = "sha256:31434001b7963bbc8a92602b6e57149c95f94e7430edbb956230f29235b9098a", size = 2960332 },
+    { url = "https://files.pythonhosted.org/packages/b6/e4/0a537fb4653deedfbd0b8f55eceef618f0555c641751533cbeaf9f302717/aic_sdk-2.1.0-cp314-cp314-win_arm64.whl", hash = "sha256:2efff1e70704f0cc44bab078a2d227eaf94e0c63c32f6bfbe63915dc5335161e", size = 2645446 },
 ]
 
 [[package]]
@@ -57,7 +58,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "aic-sdk", specifier = ">=2.0.0" },
+    { name = "aic-sdk", specifier = ">=2.1.0" },
     { name = "datashader", specifier = ">=0.18.2" },
     { name = "holoviews", specifier = ">=1.22.1" },
     { name = "numpy", specifier = ">=2.3.5" },

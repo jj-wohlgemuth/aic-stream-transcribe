@@ -17,6 +17,7 @@ class SonioxStreamer:
         self.api_name = "Soniox RT"
         self.on_update = on_update
         self.final_tokens: list[dict] = []
+        self._segment_final_count = 0  # tracks finals seen in current segment
         self.lock = threading.Lock()
         self.finished_event = threading.Event()
         config = self.get_config(api_key, fs_hz)
@@ -92,15 +93,24 @@ class SonioxStreamer:
                 if res.get("error_code") is not None:
                     break
 
+                finals_in_msg: list[dict] = []
                 non_final_tokens: list[dict] = []
 
+                for token in res.get("tokens", []):
+                    if token.get("text"):
+                        if token.get("is_final"):
+                            finals_in_msg.append(token)
+                        else:
+                            non_final_tokens.append(token)
+
                 with self.lock:
-                    for token in res.get("tokens", []):
-                        if token.get("text"):
-                            if token.get("is_final"):
-                                self.final_tokens.append(token)
-                            else:
-                                non_final_tokens.append(token)
+                    if len(finals_in_msg) < self._segment_final_count:
+                        # Fewer finals than before → new segment started, reset counter
+                        self._segment_final_count = 0
+                    # Only append finals beyond what we've already seen in this segment
+                    new_finals = finals_in_msg[self._segment_final_count:]
+                    self.final_tokens.extend(new_finals)
+                    self._segment_final_count = len(finals_in_msg)
 
                     current_finals = list(self.final_tokens)
 
